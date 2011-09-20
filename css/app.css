@@ -1,0 +1,50 @@
+html, body {
+    font-family: "Helvetica Neue", "Helvetica", sans-serif;
+}
+
+header {
+    background-color: #272F30;
+    height: 70px;
+}
+
+.connected-users {
+    overflow: hidden;
+    list-style-type: none;
+}
+
+.user {
+    font-size: 14px;
+}
+
+.iterate-logo {
+    display: block;
+    text-indent: -9999px;
+    width: 100px;
+    height: 32px;
+    background: url('../iter8.png') no-repeat;
+}
+
+.point-button {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background-color: #E5B051;
+    height: 120px;
+    cursor: pointer;
+}
+
+.point-button-label {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 64px;
+    font-weight: bold;
+    color: #9E2B20;
+}
+
+.point-button:hover, .point-button.selected {
+    background-color: #272F30;
+}
+
+.point-button.selected .point-button-label {
+    color: #DF3F1B;
+}
