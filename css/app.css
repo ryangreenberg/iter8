@@ -16,12 +16,24 @@ header {
     font-size: 14px;
 }
 
+.user:after {
+    content: '\2022';
+    padding-left: 5px;
+    color: #666;
+}
+
+.user.voted:after {
+    content: '\2714';
+    color: #060;
+}
+
 .iterate-logo {
     display: block;
     text-indent: -9999px;
     width: 100px;
     height: 32px;
-    background: url('../iter8.png') no-repeat;
+    margin-top: 15px;
+    background: url('../images/iter8.png') no-repeat;
 }
 
 .point-button {
