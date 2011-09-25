@@ -4,48 +4,12 @@
   <link rel="stylesheet" href="css/reset.css" type="text/css">
   <link rel="stylesheet" href="css/960_24_col.css" type="text/css">
   <link rel="stylesheet" href="css/app.css" type="text/css">
-  
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>  
-  <script src="js/client.js"></script>  
-  
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-  // socket.on('users:list', function(data){
-  //   console.log(data);
-  //   var $connectedUsers = $('.connected-users');
-  //   $connectedUsers.empty();
-  //   for(var k in data){
-  //     $connectedUsers.append('<li>' + data[k] + '</li>');
-  //   }
-  // });
-  // 
-  // socket.on('newStory', function(data){
-  //   $('.current-story-name').text(data.name);
-  // });
-  // 
-  // function addUser(nickname){
-  //   $('<li>' + nickname + '</li>').appendTo('.connected-users');
-  // }
-  // 
-  // $(function() {
-  //   $('.my-nickname').change(function() {
-  //     var nickname = $(this).val();
-  //     socket.emit('user:rename', {nickname: nickname}, function(rsp){
-  //       console.log('rsp', rsp);
-  //     });
-  //   });
-  //   
-  //   $('.change-story').click(function(){
-  //     var storyName = prompt("What is the name of the new story?");
-  //     if (storyName) {
-  //       socket.emit('startStory', {name: storyName});
-  //     }
-  //   });
-  // });  
-  </script>
-  <style></style>
-  <title></title>
+  <script src="js/client.js"></script>
+
+  <title>Iter8</title>
 </head>
 <body>
 <header>
@@ -54,11 +18,12 @@
   </h1>
 </header>
 <section id="page" class="container_24">
-  
-  <div class="controls points grid_6 omega push_18">
+
+  <div class="controls grid_6 omega push_18">
     <h3>Admin</h3>
-    <ul class="admin">
-    </ul>
+    <div class="admin">
+      <input id="close-voting" type="button" value="Close Voting">
+    </div>
     <h3>Connected</h3>
     <ul class="connected-users">
       <li class="user me">Ryan<span class="status"></span></li>
@@ -70,9 +35,9 @@
       <li class="user">Franklin<span class="status"></span></li>
     </ul>
   </div>
-  
+
   <h2 class="story grid_18 alpha pull_6"><div class="story-prefix">Current Story</div>A dialog appear when you click the reply button</h2>
-  
+
   <ul class="points grid_18 alpha pull_6">
     <li class="point-button grid_3 unselectable alpha" data-value="0"><div class="point-button-label">0</div></li>
     <li class="point-button grid_3 unselectable" data-value="1"><div class="point-button-label">1</div></li>

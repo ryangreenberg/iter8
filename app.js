@@ -24,6 +24,10 @@ function Iteration(){
   this.currentStory = null;
   this.pastStories = [];
 }
+Iteration.prototype.removeUser = function(userId){
+  delete this.users[userId];
+  delete this.currentStory.votes[userId];
+}
 Iteration.prototype.newStory = function(){
   this.currentStory = new Story('untitled');
 }
@@ -49,20 +53,21 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('voteList', iteration.currentStory.votes);
     fn(iteration.currentStory.votes);
   });
-  
-  // socket.on('startStory', function(data, fn) {
-  //   currentStory = new Story(data.name);
-  //   socket.broadcast.emit('newStory', {name: data.name});
-  // });
-  
+
   socket.on('nameChange', function(newName, fn) {
     user.name = newName;
     socket.emit('userList', iteration.users);
     socket.broadcast.emit('userList', iteration.users);
   });
 
+  socket.on('closeVoting', function(newName, fn) {
+    user.name = newName;
+    socket.broadcast.emit('votingComplete', iteration.currentStory.votes);
+    fn(iteration.currentStory.votes);
+  });
+
   socket.on('disconnect', function() {
-    delete iteration.users[socket.id];
+    iteration.removeUser(socket.id);
     socket.broadcast.emit('userList', iteration.users);
   });
 

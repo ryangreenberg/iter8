@@ -1,6 +1,6 @@
 var iter8 = {
   debug: {
-    enabled: false,
+    enabled: true,
     logEvent: function(e, msg) {
       if (iter8.debug.enabled) {
         console.log(msg.eventName, msg.msg);
@@ -12,7 +12,7 @@ var iter8 = {
   ui: {}
 };
 
-iter8.send = function(eventName, msg, fn) {  
+iter8.send = function(eventName, msg, fn) {
   $(document).trigger('send', {eventName: eventName, msg: msg});
   if (iter8.socket) {
     iter8.socket.emit(eventName, msg, function(rsp){
@@ -28,7 +28,7 @@ iter8.ui = {
   toggleVote: function(event) {
     var $this = $(this),
         points = null;
-        
+
     if ($this.is('.selected')) {
       $this.removeClass('selected');
     } else {
@@ -36,10 +36,14 @@ iter8.ui = {
       $this.addClass('selected');
       points = $this.data('value');
     }
-    
+
     iter8.send('vote', points, iter8.ui.updateVotes);
   },
-  
+
+  closeVoting: function() {
+    iter8.send('closeVoting', {}, iter8.ui.showVotingResults);
+  },
+
   updateUsers: function(usersById) {
     // Remove existing users who are no longer connected
     $('.connected-users .user').each(function(){
@@ -55,10 +59,10 @@ iter8.ui = {
         $('<li class="user" data-user-id=' + id + '>' + usersById[id].name + '</li>').appendTo('.connected-users');
       }
     }
-    
+
     $('.user[data-user-id=' + iter8.socket.socket.sessionid + ']').addClass('me');
   },
-  
+
   updateVotes: function(votesById) {
     // Add new users who have recently connected
     for(var id in votesById) {
@@ -70,7 +74,16 @@ iter8.ui = {
       }
     }
   },
-  
+
+  showVotingResults: function(votesById) {
+    var votes = [];
+    for (var k in votesById) {
+      votes.push(votesById[k]);
+    }
+    $('.average').text(iter8.util.average(votes));
+    $('.median').text(iter8.util.median(votes));
+  },
+
   changeName: function(){
     var newName = prompt("Enter your name");
     if (newName) {
@@ -80,14 +93,39 @@ iter8.ui = {
   }
 };
 
+iter8.util = {
+  median: function(arr) {
+    arr.sort(function(a, b){ return a - b; });
+    var size = arr.length;
+    if (size % 2 == 0) {
+      return iter8.util.average([ arr[(size / 2) - 1], arr[(size / 2)] ]);
+    } else {
+      return arr[Math.floor(size / 2)];
+    }
+  },
+
+  average: function(arr) {
+    return iter8.util.sum(arr) / arr.length;
+  },
+
+  sum: function(arr) {
+    var s = 0;
+    for (var i=0; i < arr.length; i++) {
+      s += arr[i];
+    }
+    return s;
+  }
+};
+
 // Boot
 // Event bindings
 $(function() {
   iter8.socket = io.connect('http://localhost');
-  
+
   // UI
   $('.point-button').click(iter8.ui.toggleVote);
   $('.user.me').live('click', iter8.ui.changeName);
+  $('#close-voting').click(iter8.ui.closeVoting);
 
   // MESSAGES
   iter8.socket.on('userList', function(msg){
@@ -98,12 +136,16 @@ $(function() {
     iter8.ui.updateVotes(msg);
     iter8.debug.logEvent(null, {eventName: 'voteList', msg: msg});
   });
+  iter8.socket.on('votingComplete', function(msg){
+    iter8.ui.showVotingResults(msg);
+    iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
+  });
 
   // DEBUG
   if (iter8.debug.enabled) {
-    $(document).bind('send', iter8.debug.logEvent);    
+    $(document).bind('send', iter8.debug.logEvent);
     $(document).bind('receive', iter8.debug.logEvent);
   }
-  
+
   $('.point-button, .point-button-label').attr('unselectable', 'on');
 });
