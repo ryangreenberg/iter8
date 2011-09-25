@@ -84,6 +84,39 @@ header {
     color: #DF3F1B;
 }
 
+.distribution {
+    width: 100%;
+}
+
+.distribution td {
+    padding-bottom: 2px;
+    vertical-align: top;
+}
+
+.points {
+    color: #DF3F1B;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.votes {
+}
+
+.votes-bar {
+    margin-top: 4px;
+    width: 250px;
+    height: 12px;
+    background-color: #E5B051;
+	float: left;
+}
+
+.votes-label {
+    font-size: 12px;
+    font-weight: bold;
+    padding-left: 4px;
+    max-width: 20px;
+}
+
 .unselectable {
     -webkit-user-select: none;
     -khtml-user-select: none;
