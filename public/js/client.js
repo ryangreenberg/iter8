@@ -142,10 +142,8 @@ $(function() {
   });
 
   // DEBUG
-  if (iter8.debug.enabled) {
-    $(document).bind('send', iter8.debug.logEvent);
-    $(document).bind('receive', iter8.debug.logEvent);
-  }
+  $(document).bind('send', iter8.debug.logEvent);
+  $(document).bind('receive', iter8.debug.logEvent);
 
   $('.point-button, .point-button-label').attr('unselectable', 'on');
 });
