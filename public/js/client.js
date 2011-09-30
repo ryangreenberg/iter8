@@ -80,8 +80,8 @@ iter8.ui = {
     for (var k in votesById) {
       votes.push(votesById[k]);
     }
-    $('.average').text(iter8.util.average(votes));
-    $('.median').text(iter8.util.median(votes));
+    $('.average').text(iter8.util.round(iter8.util.average(votes), 1));
+    $('.median').text(iter8.util.round(iter8.util.median(votes), 1));
   },
 
   changeName: function(){
@@ -114,6 +114,12 @@ iter8.util = {
       s += arr[i];
     }
     return s;
+  },
+
+  round: function(num, digitsAfterDecimal) {
+    digitsAfterDecimal = digitsAfterDecimal || 0;
+    var decimalShift = Math.pow(10, digitsAfterDecimal);
+    return Math.round(num * decimalShift) / decimalShift;
   }
 };
 
