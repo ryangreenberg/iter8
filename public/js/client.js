@@ -7,9 +7,15 @@ var iter8 = {
       }
     }
   },
+  // Could be configurable, sent by server
+  points: [0,1,2,3,5,8],
   models: {},
   socket: null,
-  ui: {}
+  ui: {},
+
+  // Populated from server
+  users: {},
+  currentStory: null
 };
 
 iter8.send = function(eventName, msg, fn) {
@@ -82,6 +88,29 @@ iter8.ui = {
     }
     $('.average').text(iter8.util.round(iter8.util.average(votes), 1));
     $('.median').text(iter8.util.round(iter8.util.median(votes), 1));
+    iter8.ui.displayDistribution(votes);
+  },
+
+  displayDistribution: function(votes) {
+    var votesByPoints = iter8.points.reduce(function(hash, votes){
+      hash[votes] = 0; return hash;
+    }, {});
+    votesByPoints = votes.reduce(function(hash, vote) {
+      hash[vote]++;
+      return hash;
+    }, votesByPoints);
+
+    var maxWidth = 340;
+    var numVotes = votes.length;
+
+    for (var i=0; i < iter8.points.length; i++) {
+      var pointValue = iter8.points[i];
+      var $distRow = $('.dist-' + pointValue);
+      // TODO Could animate
+      var distWidth = Math.round(340 * (votesByPoints[pointValue] / numVotes));
+      $distRow.find('.votes-bar').css('width', distWidth);
+      $distRow.find('.votes-label').text(votesByPoints[pointValue]);
+    }
   },
 
   changeName: function(){
@@ -120,6 +149,15 @@ iter8.util = {
     digitsAfterDecimal = digitsAfterDecimal || 0;
     var decimalShift = Math.pow(10, digitsAfterDecimal);
     return Math.round(num * decimalShift) / decimalShift;
+  },
+
+  // TODO: replace with underscore when I have access to the Internet
+  keys: function(obj) {
+    var keys = [];
+    for (var key in obj) {
+      keys.push(key);
+    }
+    return keys;
   }
 };
 
@@ -135,7 +173,8 @@ $(function() {
 
   // MESSAGES
   iter8.socket.on('userList', function(msg){
-    iter8.ui.updateUsers(msg);
+    iter8.users = msg;
+    iter8.ui.updateUsers(iter8.users);
     iter8.debug.logEvent(null, {eventName: 'userList', msg: msg});
   });
   iter8.socket.on('voteList', function(msg){
