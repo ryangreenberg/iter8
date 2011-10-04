@@ -86,11 +86,11 @@ header {
     color: #DF3F1B;
 }
 
-.distribution {
+.distribution-table {
     width: 100%;
 }
 
-.distribution td {
+.distribution-table td {
     padding-bottom: 2px;
     vertical-align: top;
 }
@@ -99,6 +99,7 @@ header {
     color: #DF3F1B;
     font-weight: bold;
     font-size: 16px;
+    padding-right: 5px;
 }
 
 .votes {
