@@ -1,1 +1,1 @@
-../../models.js
+../../lib/models.js

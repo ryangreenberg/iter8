@@ -1,1 +1,1 @@
-../../deserializer.js
+../../lib/deserializer.js
