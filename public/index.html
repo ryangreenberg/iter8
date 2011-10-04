@@ -5,9 +5,11 @@
   <link rel="stylesheet" href="css/960_24_col.css" type="text/css">
   <link rel="stylesheet" href="css/app.css" type="text/css">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+  <script src="js/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/client.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/deserializer.js"></script>
 
   <title>Iter8</title>
 </head>
@@ -36,57 +38,63 @@
     </ul>
   </div>
 
-  <h2 class="story grid_18 alpha pull_6"><div class="story-prefix">Current Story</div>A dialog appear when you click the reply button</h2>
+  <div class="voting grid_18 alpha pull_6">
+    <h2 class="story"><div class="story-prefix">Current Story</div>A dialog appear when you click the reply button</h2>
 
-  <ul class="points grid_18 alpha pull_6">
-    <li class="point-button grid_3 unselectable alpha" data-value="0"><div class="point-button-label">0</div></li>
-    <li class="point-button grid_3 unselectable" data-value="1"><div class="point-button-label">1</div></li>
-    <li class="point-button grid_3 unselectable" data-value="2"><div class="point-button-label">2</div></li>
-    <li class="point-button grid_3 unselectable" data-value="3"><div class="point-button-label">3</div></li>
-    <li class="point-button grid_3 unselectable" data-value="5"><div class="point-button-label">5</div></li>
-    <li class="point-button grid_3 unselectable omega" data-value="8"><div class="point-button-label">8</div></li>
-  </ul>
+    <ul class="points">
+      <li class="point-button grid_3 unselectable alpha" data-value="0"><div class="point-button-label">0</div></li>
+      <li class="point-button grid_3 unselectable" data-value="1"><div class="point-button-label">1</div></li>
+      <li class="point-button grid_3 unselectable" data-value="2"><div class="point-button-label">2</div></li>
+      <li class="point-button grid_3 unselectable" data-value="3"><div class="point-button-label">3</div></li>
+      <li class="point-button grid_3 unselectable" data-value="5"><div class="point-button-label">5</div></li>
+      <li class="point-button grid_3 unselectable omega" data-value="8"><div class="point-button-label">8</div></li>
+    </ul>
 
-  <div class="results grid_18 alpha">
-    <div class="grid_4 alpha">
-      <h3>Average</h3>
-      <div class="point-button unselectable"><div class="average point-button-label">5</div></div>
-    </div>
-    <div class="grid_4">
-      <h3>Median</h3>
-      <div class="point-button unselectable"><div class="median point-button-label">5</div></div>
-    </div>
-    <div class="grid_10 omega">
-      <h3>Distribution</h3>
-      <table class="distribution">
-        <tbody>
-          <tr>
-            <td class="points">0</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">14</span></td>
-          </tr>
-          <tr>
-            <td class="points">1</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">8</span></td>
-          </tr>
-          <tr>
-            <td class="points">2</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">9</span></td>
-          </tr>
-          <tr>
-            <td class="points">3</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
-          </tr>
-          <tr>
-            <td class="points">5</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
-          </tr>
-          <tr>
-            <td class="points">8</td>
-            <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="results" style="display: none">
+      <div class="grid_4 alpha">
+        <h3>Average</h3>
+        <div class="point-button unselectable"><div class="average point-button-label">0</div></div>
+      </div>
+      <div class="grid_4">
+        <h3>Median</h3>
+        <div class="point-button unselectable"><div class="median point-button-label">0</div></div>
+      </div>
+      <div class="distribution grid_10 omega">
+        <h3>Distribution</h3>
+        <table class="distribution-table">
+          <tbody>
+            <tr class="dist-0">
+              <td class="points">0</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+            <tr class="dist-1">
+              <td class="points">1</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+            <tr class="dist-2">
+              <td class="points">2</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+            <tr class="dist-3">
+              <td class="points">3</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+            <tr class="dist-5">
+              <td class="points">5</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+            <tr class="dist-8">
+              <td class="points">8</td>
+              <td class="votes"><div class="votes-bar"></div><span class="votes-label">0</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+  </div>
+
+
+
   </div>
 </section>
 
