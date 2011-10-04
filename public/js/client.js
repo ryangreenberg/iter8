@@ -11,6 +11,8 @@ var iter8 = {
   points: [0,1,2,3,5,8],
   models: {},
   socket: null,
+
+  events: {},
   ui: {},
 
   // Populated from server
@@ -30,6 +32,26 @@ iter8.send = function(eventName, msg, fn) {
   }
 };
 
+iter8.events = {
+  userList: function(msg){
+    // TODO replace with underscore when I have access to the Internet
+    iter8.users = iter8.deserializer.deserialize(msg);
+    iter8.ui.updateUsers(iter8.users);
+    iter8.debug.logEvent(null, {eventName: 'userList', msg: msg});
+  },
+
+  voteList: function(msg){
+    iter8.ui.updateVotes(msg);
+    iter8.debug.logEvent(null, {eventName: 'voteList', msg: msg});
+  },
+
+  votingComplete: function(msg){
+    iter8.ui.hideVotingControls();
+    iter8.ui.showVotingResults(msg);
+    iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
+  }
+};
+
 iter8.ui = {
   toggleVote: function(event) {
     var $this = $(this),
@@ -43,28 +65,30 @@ iter8.ui = {
       points = $this.data('value');
     }
 
-    iter8.send('vote', points, iter8.ui.updateVotes);
+    iter8.send('vote', points, iter8.events.voteList);
   },
 
   closeVoting: function() {
-    iter8.send('closeVoting', {}, iter8.ui.showVotingResults);
+    iter8.send('closeVoting', {}, iter8.events.votingComplete);
   },
 
-  updateUsers: function(usersById) {
+  updateUsers: function(users) {
+    var userIds = users.map(function(u){ return u.id; });
     // Remove existing users who are no longer connected
     $('.connected-users .user').each(function(){
       var userId = $(this).data('user-id');
-      if (!usersById[userId]) {
+      if (userIds.indexOf(userId) == -1) {
         $(this).remove();
       }
     });
 
     // Add new users who have recently connected
-    for(var id in usersById) {
-      if ($('.user[data-user-id=' + id + ']').length == 0) {
-        $('<li class="user" data-user-id=' + id + '>' + usersById[id].name + '</li>').appendTo('.connected-users');
+    for (var i=0; i < users.length; i++) {
+      var user = users[i];
+      if ($('.user[data-user-id=' + user.id + ']').length == 0) {
+        $('<li class="user" data-user-id=' + user.id + '>' + user.name + '</li>').appendTo('.connected-users');
       }
-    }
+    };
 
     $('.user[data-user-id=' + iter8.socket.socket.sessionid + ']').addClass('me');
   },
@@ -81,7 +105,16 @@ iter8.ui = {
     }
   },
 
+  showVotingControls: function() {
+    $('.point-buttons').show();
+  },
+
+  hideVotingControls: function() {
+    $('.point-buttons').hide();
+  },
+
   showVotingResults: function(votesById) {
+    $('.results').show();
     var votes = [];
     for (var k in votesById) {
       votes.push(votesById[k]);
@@ -165,6 +198,7 @@ iter8.util = {
 // Event bindings
 $(function() {
   iter8.socket = io.connect('http://localhost');
+  iter8.deserializer = new iter8.Deserializer(iter8.models);
 
   // UI
   $('.point-button').click(iter8.ui.toggleVote);
@@ -172,19 +206,9 @@ $(function() {
   $('#close-voting').click(iter8.ui.closeVoting);
 
   // MESSAGES
-  iter8.socket.on('userList', function(msg){
-    iter8.users = msg;
-    iter8.ui.updateUsers(iter8.users);
-    iter8.debug.logEvent(null, {eventName: 'userList', msg: msg});
-  });
-  iter8.socket.on('voteList', function(msg){
-    iter8.ui.updateVotes(msg);
-    iter8.debug.logEvent(null, {eventName: 'voteList', msg: msg});
-  });
-  iter8.socket.on('votingComplete', function(msg){
-    iter8.ui.showVotingResults(msg);
-    iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
-  });
+  iter8.socket.on('userList', iter8.events.userList);
+  iter8.socket.on('voteList', iter8.events.voteList);
+  iter8.socket.on('votingComplete', iter8.events.votingComplete);
 
   // DEBUG
   $(document).bind('send', iter8.debug.logEvent);
