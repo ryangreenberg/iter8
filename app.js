@@ -16,7 +16,7 @@ function handler (req, rsp) {
 }
 
 var iteration = new models.Iteration();
-iteration.newStory();
+iteration.startStory();
 
 io.sockets.on('connection', function (socket) {
 
@@ -24,6 +24,13 @@ io.sockets.on('connection', function (socket) {
   iteration.users.push(user);
   socket.emit('userList', iteration.users);
   socket.broadcast.emit('userList', iteration.users);
+
+  socket.on('newStory', function(story, fn) {
+    console.log("user", user.name, "has started a new story", story.name);
+    iteration.startStory(story.name);
+    socket.broadcast.emit('newStory', iteration.currentStory);
+    fn(iteration.currentStory);
+  });
 
   socket.on('vote', function(points, fn) {
     console.log('Received vote', points);
