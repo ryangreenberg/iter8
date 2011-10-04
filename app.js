@@ -1,12 +1,13 @@
-#!/usr/bin/env node
+require.paths.push('lib');
 
 var app = require('http').createServer(handler),
     io = require('socket.io').listen(app),
     fs = require('fs'),
-    static = require('node-static');
+    nodeStatic = require('node-static'),
+    models = require('models');
 
 app.listen(8080);
-var file = new(static.Server)('./public');
+var file = new(nodeStatic.Server)('./public');
 
 function handler (req, rsp) {
   req.addListener('end', function () {
@@ -14,36 +15,13 @@ function handler (req, rsp) {
   });
 }
 
-function User(id, name){
-  this.id = id;
-  this.name = name || 'unnamed';
-}
-
-function Iteration(){
-  this.users = {};
-  this.currentStory = null;
-  this.pastStories = [];
-}
-Iteration.prototype.removeUser = function(userId){
-  delete this.users[userId];
-  delete this.currentStory.votes[userId];
-}
-Iteration.prototype.newStory = function(){
-  this.currentStory = new Story('untitled');
-}
-
-function Story(name){
-  this.name = name;
-  this.votes = {};
-}
-
-var iteration = new Iteration();
+var iteration = new models.Iteration();
 iteration.newStory();
 
 io.sockets.on('connection', function (socket) {
 
-  var user = new User(socket.id);
-  iteration.users[socket.id] = user;
+  var user = new models.User(socket.id);
+  iteration.users.push(user);
   socket.emit('userList', iteration.users);
   socket.broadcast.emit('userList', iteration.users);
 
@@ -56,17 +34,19 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('nameChange', function(newName, fn) {
     user.name = newName;
-    socket.emit('userList', iteration.users);
-    socket.broadcast.emit('userList', iteration.users);
+    var userList = iteration.users;
+    socket.emit('userList', userList);
+    socket.broadcast.emit('userList', userList);
   });
 
   socket.on('closeVoting', function(newName, fn) {
-    user.name = newName;
+    console.log("user", user.name, "has closed voting on the current story");
     socket.broadcast.emit('votingComplete', iteration.currentStory.votes);
     fn(iteration.currentStory.votes);
   });
 
   socket.on('disconnect', function() {
+    console.log("user", user.name, "(", user.id, ") disconnected");
     iteration.removeUser(socket.id);
     socket.broadcast.emit('userList', iteration.users);
   });
