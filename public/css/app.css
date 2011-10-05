@@ -100,6 +100,7 @@ header {
     font-weight: bold;
     font-size: 16px;
     padding-right: 5px;
+    width: 10px;
 }
 
 .votes {
@@ -119,6 +120,23 @@ header {
     font-weight: bold;
     padding-left: 4px;
     max-width: 20px;
+}
+
+.votes-by-user {
+  list-style-type: none;
+  overflow: hidden;
+}
+
+.votes-by-user li {
+  float: left;
+  margin-right: 20px;
+}
+
+.user-name {
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #666;
 }
 
 .unselectable {

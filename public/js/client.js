@@ -1,6 +1,6 @@
 var iter8 = {
   debug: {
-    enabled: true,
+    enabled: false,
     logEvent: function(e, msg) {
       if (iter8.debug.enabled) {
         console.log(msg.eventName, msg.msg);
@@ -76,6 +76,12 @@ iter8.ui = {
   },
 
   closeVoting: function() {
+    if ($('.user:not(.voted)').length > 0) {
+      var closeAnyway = confirm("Some connected users have not voted. Close anyway?");
+      if (!closeAnyway) {
+        return;
+      }
+    }
     iter8.send('closeVoting', {}, iter8.events.votingComplete);
   },
 
@@ -92,8 +98,15 @@ iter8.ui = {
   },
 
   showNewStory: function(story) {
-    $('.voting').show();
+    iter8.ui.hideVotingResults();
+    iter8.ui.showVotingControls();
+    iter8.ui.resetVotes();
     $('.story-name').text(story.name);
+  },
+
+  resetVotes: function() {
+    $('.point-button.selected').removeClass('selected');
+    $('.users').removeClass('voted');
   },
 
   updateUsers: function(users) {
@@ -118,13 +131,11 @@ iter8.ui = {
   },
 
   updateVotes: function(votesById) {
-    // TODO: Add new users who have recently connected?
+    $('.user').removeClass('voted');
     for(var id in votesById) {
       var user = $('.user[data-user-id=' + id + ']');
       if (votesById[id] !== null) {
         user.addClass('voted');
-      } else {
-        user.removeClass('voted');
       }
     }
   },
@@ -146,6 +157,17 @@ iter8.ui = {
     $('.average').text(iter8.util.round(iter8.util.average(votes), 1));
     $('.median').text(iter8.util.round(iter8.util.median(votes), 1));
     iter8.ui.displayDistribution(votes);
+    iter8.ui.displayVotesByUser(iter8.users, votesById);
+  },
+
+  displayVotesByUser: function(users, votesById) {
+    $('.votes-by-user').empty();
+    var html = '';
+    $(users).each(function(){
+      var vote = votesById[this.id] || 'n/a';
+      html += '<li><span class="user-name">' + this.name + '</span> <span class="user-vote">' + vote + '</span></li>';
+    });
+    $('.votes-by-user').html(html);
   },
 
   hideVotingResults: function() {
@@ -168,7 +190,7 @@ iter8.ui = {
       var pointValue = iter8.points[i];
       var $distRow = $('.dist-' + pointValue);
       // TODO Could animate
-      var distWidth = Math.round(340 * (votesByPoints[pointValue] / numVotes));
+      var distWidth = Math.round(maxWidth * (votesByPoints[pointValue] / numVotes));
       $distRow.find('.votes-bar').css('width', distWidth);
       $distRow.find('.votes-label').text(votesByPoints[pointValue]);
     }
@@ -225,11 +247,11 @@ iter8.util = {
 // Boot
 // Event bindings
 $(function() {
-  iter8.socket = io.connect('http://localhost');
+  iter8.socket = io.connect();
   iter8.deserializer = new iter8.Deserializer(iter8.models);
 
   // UI
-  $('.point-button').click(iter8.ui.toggleVote);
+  $('.point-buttons .point-button').click(iter8.ui.toggleVote);
   $('.user.me').live('click', iter8.ui.changeName);
   $('#new-story').click(iter8.ui.createNewStory);
   $('#close-voting').click(iter8.ui.closeVoting);

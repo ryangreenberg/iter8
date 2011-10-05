@@ -24,9 +24,10 @@
   <div class="controls grid_6 omega push_18">
     <h3>Admin</h3>
     <div class="admin">
+      <input id="new-story" type="button" value="New Story">
       <input id="close-voting" type="button" value="Close Voting">
     </div>
-    <h3>Connected</h3>
+    <h3>Connected Users</h3>
     <ul class="connected-users">
       <li class="user me">Ryan<span class="status"></span></li>
       <li class="user">Alice<span class="status"></span></li>
@@ -53,11 +54,11 @@
     <div class="results" style="display: none">
       <div class="grid_4 alpha">
         <h3>Average</h3>
-        <div class="point-button unselectable"><div class="average point-button-label">0</div></div>
+        <div class="point-button"><div class="average point-button-label">0</div></div>
       </div>
       <div class="grid_4">
         <h3>Median</h3>
-        <div class="point-button unselectable"><div class="median point-button-label">0</div></div>
+        <div class="point-button"><div class="median point-button-label">0</div></div>
       </div>
       <div class="distribution grid_10 omega">
         <h3>Distribution</h3>
@@ -91,10 +92,18 @@
         </table>
       </div>
 
-  </div>
-
-
-
+      <div class="grid_18">
+        <ul class="votes-by-user">
+          <li><span class="user-name">Ryan</span> <span class="user-vote">3</span></li>
+          <li><span class="user-name">Alice</span> <span class="user-vote">5</span></li>
+          <li><span class="user-name">Bruce</span> <span class="user-vote">5</span></li>
+          <li><span class="user-name">Caitlin</span> <span class="user-vote">5</span></li>
+          <li><span class="user-name">Dion</span> <span class="user-vote">5</span></li>
+          <li><span class="user-name">Eleanor</span> <span class="user-vote">5</span></li>
+          <li><span class="user-name">Franklin</span> <span class="user-vote">5</span></li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 

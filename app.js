@@ -16,14 +16,22 @@ function handler (req, rsp) {
 }
 
 var iteration = new models.Iteration();
-iteration.startStory();
+iteration.startStory('untitled story');
 
 io.sockets.on('connection', function (socket) {
 
   var user = new models.User(socket.id);
   iteration.users.push(user);
+
   socket.emit('userList', iteration.users);
   socket.broadcast.emit('userList', iteration.users);
+
+  socket.emit('newStory', iteration.currentStory);
+  if (iteration.state == 'voting') {
+    socket.emit('voteList', iteration.currentStory.votes);
+  } else if (iteration.state == 'viewingResults') {
+    socket.emit('votingComplete', iteration.currentStory.votes);
+  }
 
   socket.on('newStory', function(story, fn) {
     console.log("user", user.name, "has started a new story", story.name);
@@ -42,12 +50,14 @@ io.sockets.on('connection', function (socket) {
   socket.on('nameChange', function(newName, fn) {
     user.name = newName;
     var userList = iteration.users;
+    // TODO: When someone changes their name, clients lose the current vote state
     socket.emit('userList', userList);
     socket.broadcast.emit('userList', userList);
   });
 
   socket.on('closeVoting', function(newName, fn) {
     console.log("user", user.name, "has closed voting on the current story");
+    iteration.closeVoting();
     socket.broadcast.emit('votingComplete', iteration.currentStory.votes);
     fn(iteration.currentStory.votes);
   });
