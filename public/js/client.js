@@ -154,10 +154,20 @@ iter8.ui = {
     for (var k in votesById) {
       votes.push(votesById[k]);
     }
-    $('.average').text(iter8.util.round(iter8.util.average(votes), 1));
-    $('.median').text(iter8.util.round(iter8.util.median(votes), 1));
-    iter8.ui.displayDistribution(votes);
-    iter8.ui.displayVotesByUser(iter8.users, votesById);
+
+    // TODO Should probably also prevent closing voting if nobody has actually voted
+    if (votes.length == 0) {
+      $('.average').text('?');
+      $('.median').text('?');
+      iter8.ui.displayDistribution(votes);
+      iter8.ui.displayVotesByUser(iter8.users, votesById);
+    } else {
+      $('.average').text(iter8.util.round(iter8.util.average(votes), 1));
+      $('.median').text(iter8.util.round(iter8.util.median(votes), 1));
+      iter8.ui.displayDistribution(votes);
+      iter8.ui.displayVotesByUser(iter8.users, votesById);
+    }
+
   },
 
   displayVotesByUser: function(users, votesById) {
@@ -178,6 +188,16 @@ iter8.ui = {
   },
 
   displayDistribution: function(votes) {
+    // TODO Should have better handling of cases where nobody has voted
+    if (votes.length == 0) {
+      for (var i=0; i < iter8.points.length; i++) {
+        var $distRow = $('.dist-' + pointValue);
+        $distRow.find('.votes-bar').css('width', 0);
+        $distRow.find('.votes-label').text(0);
+      }
+      return;
+    }
+
     var votesByPoints = iter8.points.reduce(function(hash, votes){
       hash[votes] = 0; return hash;
     }, {});
