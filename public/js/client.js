@@ -164,7 +164,10 @@ iter8.ui = {
     $('.votes-by-user').empty();
     var html = '';
     $(users).each(function(){
-      var vote = votesById[this.id] || 'n/a';
+      var vote = votesById[this.id];
+      if (vote == null) {
+        vote = 'n/a';
+      };
       html += '<li><span class="user-name">' + this.name + '</span> <span class="user-vote">' + vote + '</span></li>';
     });
     $('.votes-by-user').html(html);
