@@ -24,7 +24,8 @@
   <div class="controls grid_6 omega push_18">
     <h3>Admin</h3>
     <div class="admin">
-      <input id="new-story" type="button" value="New Story">
+      <input id="change-name" type="button" value="Change Username"><br>
+      <input id="new-story" type="button" value="New Story"><br>
       <input id="close-voting" type="button" value="Close Voting">
     </div>
     <h3>Connected Users</h3>
@@ -108,5 +109,14 @@
 </section>
 
 <footer></footer>
+
+<!-- Templates -->
+<!-- <script id="user-template" type="text/html">
+<li><span class="user-name"></span> <span class="user-vote"></span></li>
+</script> -->
+
+<script id="template-user" class="template" type="text/html">
+<li data-user-id="" class="user"><span class="user-name"></span> <span class="user-vote"></span></li>
+</script>
 </body>
 </html>

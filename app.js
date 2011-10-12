@@ -34,6 +34,7 @@ io.sockets.on('connection', function (socket) {
   }
 
   socket.on('newStory', function(story, fn) {
+    // TODO Votes from past story are not cleared when starting a new story
     console.log("user", user.name, "has started a new story", story.name);
     iteration.startStory(story.name);
     socket.broadcast.emit('newStory', iteration.currentStory);

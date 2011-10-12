@@ -15,6 +15,8 @@ var iter8 = {
   events: {},
   ui: {},
 
+  tmpl: {},
+
   // Populated from server
   users: {},
   currentStory: null,
@@ -120,10 +122,14 @@ iter8.ui = {
     });
 
     // Add new users who have recently connected
+    var $template = iter8.tmpl.user;
     for (var i=0; i < users.length; i++) {
+
       var user = users[i];
       if ($('.user[data-user-id=' + user.id + ']').length == 0) {
-        $('<li class="user" data-user-id=' + user.id + '>' + user.name + '</li>').appendTo('.connected-users');
+        var $user = $template.clone();
+        $user.attr('data-user-id', user.id).find('.user-name').text(user.name);
+        $user.appendTo('.connected-users');
       }
     };
 
@@ -172,15 +178,17 @@ iter8.ui = {
 
   displayVotesByUser: function(users, votesById) {
     $('.votes-by-user').empty();
-    var html = '';
+    var $template = iter8.tmpl.user;
     $(users).each(function(){
       var vote = votesById[this.id];
       if (vote == null) {
         vote = 'n/a';
       };
-      html += '<li><span class="user-name">' + this.name + '</span> <span class="user-vote">' + vote + '</span></li>';
+      var $user = $template.clone();
+      $user.find('.user-name').text(this.name);
+      $user.find('.user-vote').text(vote);
+      $user.appendTo('.votes-by-user');
     });
-    $('.votes-by-user').html(html);
   },
 
   hideVotingResults: function() {
@@ -264,6 +272,16 @@ iter8.util = {
       keys.push(key);
     }
     return keys;
+  },
+
+  loadTemplates: function($templates) {
+    console.log("loading tempaltes");
+    $templates.each(function(){
+      $this = $(this);
+      var templateName = $this.attr('id').replace(/template-/, '');
+      var template = $($this.html());
+      iter8.tmpl[templateName] = template;
+    });
   }
 };
 
@@ -272,10 +290,11 @@ iter8.util = {
 $(function() {
   iter8.socket = io.connect();
   iter8.deserializer = new iter8.Deserializer(iter8.models);
+  iter8.util.loadTemplates($('script.template'));
 
   // UI
   $('.point-buttons .point-button').click(iter8.ui.toggleVote);
-  $('.user.me').live('click', iter8.ui.changeName);
+  $('#change-name').click(iter8.ui.changeName);
   $('#new-story').click(iter8.ui.createNewStory);
   $('#close-voting').click(iter8.ui.closeVoting);
 
