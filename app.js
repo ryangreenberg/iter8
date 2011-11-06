@@ -4,7 +4,9 @@ var app = require('http').createServer(handler),
     io = require('socket.io').listen(app),
     fs = require('fs'),
     nodeStatic = require('node-static'),
-    models = require('models');
+    models = require('models'),
+    pivotal = require('pivotal-tracker'),
+    pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
 
 app.listen(8080);
 var file = new(nodeStatic.Server)('./public');
@@ -16,9 +18,22 @@ function handler (req, rsp) {
 }
 
 var iteration = new models.Iteration();
-iteration.startStory('untitled story');
 
 io.sockets.on('connection', function (socket) {
+
+  pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, function (token) {
+    pivotal.getCurrentIteration(pivotalCredentials.projectId, token, function (results) {
+      var unpointedStories = results.iterations.iteration.map(function (iteration) {
+        var story = iteration.stories.story;
+        if (!story.estimate) return story;
+      })
+      .reduce(function (a, b) {
+        return a.concat(b);
+      });
+      iteration.stories = unpointedStories;
+      socket.emit("storiesPopulated", unpointedStories);
+    });
+  });
 
   var user = new models.User(socket.id);
   iteration.users.push(user);
@@ -26,7 +41,6 @@ io.sockets.on('connection', function (socket) {
   socket.emit('userList', iteration.users);
   socket.broadcast.emit('userList', iteration.users);
 
-  socket.emit('newStory', iteration.currentStory);
   if (iteration.state == 'voting') {
     socket.emit('voteList', iteration.currentStory.votes);
   } else if (iteration.state == 'viewingResults') {
@@ -35,8 +49,9 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('newStory', function(story, fn) {
     // TODO Votes from past story are not cleared when starting a new story
-    console.log("user", user.name, "has started a new story", story.name);
-    iteration.startStory(story.name);
+    // console.log("user", user.name, "has started a new story", story.name);
+    console.log('on newStory', story);
+    iteration.startStory(story);
     socket.broadcast.emit('newStory', iteration.currentStory);
     fn(iteration.currentStory);
   });
@@ -68,5 +83,10 @@ io.sockets.on('connection', function (socket) {
     iteration.removeUser(socket.id);
     socket.broadcast.emit('userList', iteration.users);
   });
+
+  // socket.on('storiesPopulated', function(stories) {
+  //   iteration.currentStory = stories[0];
+  //   socket.emit('newStory', iteration.currentStory);
+  // })
 
 });

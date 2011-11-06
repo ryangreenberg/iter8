@@ -1,6 +1,6 @@
 var iter8 = {
   debug: {
-    enabled: false,
+    enabled: true,
     logEvent: function(e, msg) {
       if (iter8.debug.enabled) {
         console.log(msg.eventName, msg.msg);
@@ -19,6 +19,7 @@ var iter8 = {
 
   // Populated from server
   users: {},
+  stories: [],
   currentStory: null,
   state: 'votingOnStory' // Should be populated when new story starts
 };
@@ -43,7 +44,9 @@ iter8.events = {
   },
 
   newStory: function(msg) {
+    console.log('event: newStory');
     iter8.currentStory = iter8.deserializer.deserialize(msg);
+    console.log('currentStory', currentStory);
     iter8.ui.showNewStory(iter8.currentStory);
     iter8.debug.logEvent(null, {eventName: 'newStory', msg: msg});
   },
@@ -58,6 +61,12 @@ iter8.events = {
     iter8.ui.hideVotingControls();
     iter8.ui.showVotingResults(msg);
     iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
+  },
+
+  storiesPopulated: function(msg) {
+    iter8.debug.logEvent(null, {eventName: 'storiesPopulated', msg: msg});
+    iter8.ui.showNewStory(msg[0])
+    iter8.ui.takeDown(msg);
   }
 };
 
@@ -94,8 +103,9 @@ iter8.ui = {
         return;
       }
     }
-
     var storyName = prompt("Enter a name for the new story:");
+    console.log('createNewStory', {name: storyName} );
+
     iter8.send('newStory', {name: storyName}, iter8.events.newStory);
   },
 
@@ -103,7 +113,13 @@ iter8.ui = {
     iter8.ui.hideVotingResults();
     iter8.ui.showVotingControls();
     iter8.ui.resetVotes();
+    console.log('showNewStory', story);
+
     $('.story-name').text(story.name);
+    if (story.description) {
+      $('.story-description').text(story.description);
+
+    }
   },
 
   resetVotes: function() {
@@ -233,6 +249,11 @@ iter8.ui = {
       $('.me').text(newName);
       iter8.send('nameChange', newName);
     }
+  },
+
+  takeDown: function (story) {
+    console.log('TAKEDOWN', story);
+    $('document').append($('<h1>' + story.name + '</h1>'));
   }
 };
 
@@ -275,7 +296,6 @@ iter8.util = {
   },
 
   loadTemplates: function($templates) {
-    console.log("loading tempaltes");
     $templates.each(function(){
       $this = $(this);
       var templateName = $this.attr('id').replace(/template-/, '');
@@ -296,6 +316,7 @@ $(function() {
   $('.point-buttons .point-button').click(iter8.ui.toggleVote);
   $('#change-name').click(iter8.ui.changeName);
   $('#new-story').click(iter8.ui.createNewStory);
+  $('#next-story').click(iter8.ui.moveToNextStory);
   $('#close-voting').click(iter8.ui.closeVoting);
 
   // MESSAGES
@@ -303,6 +324,7 @@ $(function() {
   iter8.socket.on('newStory', iter8.events.newStory);
   iter8.socket.on('voteList', iter8.events.voteList);
   iter8.socket.on('votingComplete', iter8.events.votingComplete);
+  iter8.socket.on('storiesPopulated', iter8.events.unpointedStories);
 
   // DEBUG
   $(document).bind('send', iter8.debug.logEvent);
