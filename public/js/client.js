@@ -58,6 +58,11 @@ iter8.events = {
     iter8.ui.hideVotingControls();
     iter8.ui.showVotingResults(msg);
     iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
+  },
+
+  storyAdvanced: function(msg) {
+    iter8.debug.logEvent(null, {eventName: 'storyAdvanced', msg: msg});
+    iter8.ui.showNewStory(msg.values);
   }
 };
 
@@ -94,16 +99,30 @@ iter8.ui = {
         return;
       }
     }
-
     var storyName = prompt("Enter a name for the new story:");
     iter8.send('newStory', {name: storyName}, iter8.events.newStory);
+  },
+
+  advanceStory: function() {
+    if (iter8.state == 'votingOnStory') {
+      var abandon = confirm("Connected users are currently pointing a story. Are you sure you want to abandon this story and move to the next one?");
+      if (!abandon) {
+        return;
+      }
+    }
+    iter8.debug.logEvent(null, {eventName: 'ui.advanceStory'});
+    iter8.send('advanceStory');
   },
 
   showNewStory: function(story) {
     iter8.ui.hideVotingResults();
     iter8.ui.showVotingControls();
     iter8.ui.resetVotes();
+    console.log('ui showNewStory', story);
     $('.story-name').text(story.name);
+    if (story.description) {
+      $('.story-description').text(story.description);
+    }
   },
 
   resetVotes: function() {
@@ -233,6 +252,11 @@ iter8.ui = {
       $('.me').text(newName);
       iter8.send('nameChange', newName);
     }
+  },
+
+  takeDown: function (story) {
+    console.log('TAKEDOWN', story);
+    $('document').append($('<h1>' + story.name + '</h1>'));
   }
 };
 
@@ -275,7 +299,6 @@ iter8.util = {
   },
 
   loadTemplates: function($templates) {
-    console.log("loading tempaltes");
     $templates.each(function(){
       $this = $(this);
       var templateName = $this.attr('id').replace(/template-/, '');
@@ -296,6 +319,7 @@ $(function() {
   $('.point-buttons .point-button').click(iter8.ui.toggleVote);
   $('#change-name').click(iter8.ui.changeName);
   $('#new-story').click(iter8.ui.createNewStory);
+  $('#next-story').click(iter8.ui.advanceStory);
   $('#close-voting').click(iter8.ui.closeVoting);
 
   // MESSAGES
@@ -303,6 +327,7 @@ $(function() {
   iter8.socket.on('newStory', iter8.events.newStory);
   iter8.socket.on('voteList', iter8.events.voteList);
   iter8.socket.on('votingComplete', iter8.events.votingComplete);
+  iter8.socket.on('storyAdvanced', iter8.events.storyAdvanced);
 
   // DEBUG
   $(document).bind('send', iter8.debug.logEvent);
