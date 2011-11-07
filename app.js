@@ -28,7 +28,9 @@ pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, funct
       return arrayA.concat(arrayB);
     })
     .filter(function(story) {
-      if (!story.estimate) return new models.Story(story);
+      if (story.story_type == 'feature'  && !story.estimate) {
+        return new models.Story(story);
+      }
     });
 
     iteration.stories = unpointedStories;
