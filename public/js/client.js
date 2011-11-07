@@ -1,6 +1,6 @@
 var iter8 = {
   debug: {
-    enabled: true,
+    enabled: false,
     logEvent: function(e, msg) {
       if (iter8.debug.enabled) {
         console.log(msg.eventName, msg.msg);
@@ -19,7 +19,6 @@ var iter8 = {
 
   // Populated from server
   users: {},
-  stories: [],
   currentStory: null,
   state: 'votingOnStory' // Should be populated when new story starts
 };
@@ -44,9 +43,7 @@ iter8.events = {
   },
 
   newStory: function(msg) {
-    console.log('event: newStory');
     iter8.currentStory = iter8.deserializer.deserialize(msg);
-    console.log('currentStory', currentStory);
     iter8.ui.showNewStory(iter8.currentStory);
     iter8.debug.logEvent(null, {eventName: 'newStory', msg: msg});
   },
@@ -63,10 +60,9 @@ iter8.events = {
     iter8.debug.logEvent(null, {eventName: 'showVotingResults', msg: msg});
   },
 
-  storiesPopulated: function(msg) {
-    iter8.debug.logEvent(null, {eventName: 'storiesPopulated', msg: msg});
-    iter8.ui.showNewStory(msg[0])
-    iter8.ui.takeDown(msg);
+  storyAdvanced: function(msg) {
+    iter8.debug.logEvent(null, {eventName: 'storyAdvanced', msg: msg});
+    iter8.ui.showNewStory(msg.values);
   }
 };
 
@@ -104,21 +100,28 @@ iter8.ui = {
       }
     }
     var storyName = prompt("Enter a name for the new story:");
-    console.log('createNewStory', {name: storyName} );
-
     iter8.send('newStory', {name: storyName}, iter8.events.newStory);
+  },
+
+  advanceStory: function() {
+    if (iter8.state == 'votingOnStory') {
+      var abandon = confirm("Connected users are currently pointing a story. Are you sure you want to abandon this story and move to the next one?");
+      if (!abandon) {
+        return;
+      }
+    }
+    iter8.debug.logEvent(null, {eventName: 'ui.advanceStory'});
+    iter8.send('advanceStory');
   },
 
   showNewStory: function(story) {
     iter8.ui.hideVotingResults();
     iter8.ui.showVotingControls();
     iter8.ui.resetVotes();
-    console.log('showNewStory', story);
-
+    console.log('ui showNewStory', story);
     $('.story-name').text(story.name);
     if (story.description) {
       $('.story-description').text(story.description);
-
     }
   },
 
@@ -316,7 +319,7 @@ $(function() {
   $('.point-buttons .point-button').click(iter8.ui.toggleVote);
   $('#change-name').click(iter8.ui.changeName);
   $('#new-story').click(iter8.ui.createNewStory);
-  $('#next-story').click(iter8.ui.moveToNextStory);
+  $('#next-story').click(iter8.ui.advanceStory);
   $('#close-voting').click(iter8.ui.closeVoting);
 
   // MESSAGES
@@ -324,7 +327,7 @@ $(function() {
   iter8.socket.on('newStory', iter8.events.newStory);
   iter8.socket.on('voteList', iter8.events.voteList);
   iter8.socket.on('votingComplete', iter8.events.votingComplete);
-  iter8.socket.on('storiesPopulated', iter8.events.unpointedStories);
+  iter8.socket.on('storyAdvanced', iter8.events.storyAdvanced);
 
   // DEBUG
   $(document).bind('send', iter8.debug.logEvent);

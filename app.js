@@ -19,22 +19,26 @@ function handler (req, rsp) {
 
 var iteration = new models.Iteration();
 
-io.sockets.on('connection', function (socket) {
-
-  pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, function (token) {
-    pivotal.getCurrentIteration(pivotalCredentials.projectId, token, function (results) {
-      var unpointedStories = results.iterations.iteration.map(function (iteration) {
-        var story = iteration.stories.story;
-        if (!story.estimate) return story;
-      })
-      .reduce(function (a, b) {
-        return a.concat(b);
-      });
-      iteration.stories = unpointedStories;
-      socket.emit("storiesPopulated", unpointedStories);
+pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, function (token) {
+  pivotal.getCurrentIteration(pivotalCredentials.projectId, token, function (results) {
+    var unpointedStories = results.iterations.iteration.map(function (iteration) {
+      return iteration.stories.story;
+    })
+    .reduce(function (arrayA, arrayB) {
+      return arrayA.concat(arrayB);
+    })
+    .filter(function(story) {
+      if (!story.estimate) return new models.Story(story);
     });
-  });
 
+    iteration.stories = unpointedStories;
+    iteration.currentStoryIndex = 0;
+    iteration.currentStory = iteration.stories[iteration.currentStoryIndex];
+  });
+});
+
+
+io.sockets.on('connection', function (socket) {
   var user = new models.User(socket.id);
   iteration.users.push(user);
 
@@ -49,8 +53,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('newStory', function(story, fn) {
     // TODO Votes from past story are not cleared when starting a new story
-    // console.log("user", user.name, "has started a new story", story.name);
-    console.log('on newStory', story);
+    console.log("user", user.name, "has started a new story", story.name);
     iteration.startStory(story);
     socket.broadcast.emit('newStory', iteration.currentStory);
     fn(iteration.currentStory);
@@ -84,9 +87,11 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('userList', iteration.users);
   });
 
-  // socket.on('storiesPopulated', function(stories) {
-  //   iteration.currentStory = stories[0];
-  //   socket.emit('newStory', iteration.currentStory);
-  // })
+  socket.on('advanceStory', function() {
+    iteration.currentStoryIndex++;
+    iteration.startStory(iteration.stories[iteration.currentStoryIndex]);
+    socket.emit("storyAdvanced", iteration.currentStory);
+  });
+
 
 });
