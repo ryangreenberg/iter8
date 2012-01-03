@@ -12,7 +12,7 @@
        "email": "dchen@twitter.com"
      }
    ],
-  "version": "0.3.0",
+  "version": "0.3.1",
   "dependencies": {
     "socket.io": "0.8.x",
     "pivotal-tracker": "0.0.x",
