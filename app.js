@@ -1,10 +1,8 @@
-require.paths.push('lib');
-
 var app = require('http').createServer(handler),
     io = require('socket.io').listen(app),
     fs = require('fs'),
     nodeStatic = require('node-static'),
-    models = require('models'),
+    models = require('./lib/models'),
     pivotal = require('pivotal-tracker'),
     pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
 
@@ -39,6 +37,7 @@ pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, funct
   });
 });
 
+io.set('log level', 1);
 
 io.sockets.on('connection', function (socket) {
   var user = new models.User(socket.id);

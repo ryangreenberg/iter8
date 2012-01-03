@@ -1,0 +1,12 @@
+{
+  "name": "iter8",
+  "description": "Iter8",
+  "author": "Ryan Greeberg",
+  "version": "0.3.0",
+  "dependencies": {
+    "socket.io": "0.8.x",
+    "pivotal-tracker": "0.0.x",
+    "node-static": "0.5.x"
+  },
+  "engine": "node >= 0.6.1"
+}
