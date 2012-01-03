@@ -1,7 +1,17 @@
 {
   "name": "iter8",
   "description": "Iter8",
-  "author": "Ryan Greeberg",
+  "author": "Ryan Greeberg <greenberg@twitter.com>",
+  "contributors": [
+     {
+       "name": "Patrick Ewing",
+       "email": "patrick@twitter.com"
+     },
+     {
+       "name": "David Chen",
+       "email": "dchen@twitter.com"
+     }
+   ],
   "version": "0.3.0",
   "dependencies": {
     "socket.io": "0.8.x",
