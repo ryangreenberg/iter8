@@ -1,13 +1,20 @@
 var app = require('http').createServer(handler),
     io = require('socket.io').listen(app),
     fs = require('fs'),
+    path = require('path'),
     nodeStatic = require('node-static'),
     models = require('./lib/models'),
-    pivotal = require('pivotal-tracker'),
-    pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
+    pivotal = require('pivotal-tracker');
 
 app.listen(8080);
 var file = new(nodeStatic.Server)('./public');
+
+// Load Pivotal Tracker if credentials file exists at .pivotal_credentials.json
+var pivotalCredentialsPath = __dirname + '/.pivotal_credentials.json',
+  pivotalCredentials;
+if (path.existsSync(pivotalCredentialsPath)) {
+  pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
+}
 
 function handler (req, rsp) {
   req.addListener('end', function () {
@@ -17,25 +24,27 @@ function handler (req, rsp) {
 
 var iteration = new models.Iteration();
 
-pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, function (token) {
-  pivotal.getCurrentIteration(pivotalCredentials.projectId, token, function (results) {
-    var unpointedStories = results.iterations.iteration.map(function (iteration) {
-      return iteration.stories.story;
-    })
-    .reduce(function (arrayA, arrayB) {
-      return arrayA.concat(arrayB);
-    })
-    .filter(function(story) {
-      if (story.story_type == 'feature'  && !story.estimate) {
-        return new models.Story(story);
-      }
-    });
+if (pivotalCredentials) {
+  pivotal.getToken(pivotalCredentials.username, pivotalCredentials.password, function (token) {
+    pivotal.getCurrentIteration(pivotalCredentials.projectId, token, function (results) {
+      var unpointedStories = results.iterations.iteration.map(function (iteration) {
+        return iteration.stories.story;
+      })
+      .reduce(function (arrayA, arrayB) {
+        return arrayA.concat(arrayB);
+      })
+      .filter(function(story) {
+        if (story.story_type == 'feature'  && !story.estimate) {
+          return new models.Story(story);
+        }
+      });
 
-    iteration.stories = unpointedStories;
-    iteration.currentStoryIndex = 0;
-    iteration.currentStory = iteration.stories[iteration.currentStoryIndex];
+      iteration.stories = unpointedStories;
+      iteration.currentStoryIndex = 0;
+      iteration.currentStory = iteration.stories[iteration.currentStoryIndex];
+    });
   });
-});
+}
 
 io.set('log level', 1);
 
