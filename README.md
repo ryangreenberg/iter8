@@ -2,9 +2,9 @@
 
 Iter8 is a tool for pointing stories as part of an agile development cycle. Users connect and vote on how long it will take to complete stories. When all users have voted, a results screen shows the vote distribution, plus average and median point values.
 
-![Screenshot of users connected to an Iter8 server](assets/voting_preview.png)
+![Screenshot of users connected to an Iter8 server](https://github.com/ryangreenberg/iter8/raw/master/assets/voting_preview.png)
 
-![Screenshot of Iter8 voting results](assets/results_preview.png)
+![Screenshot of Iter8 voting results](https://github.com/ryangreenberg/iter8/raw/master/assets/results_preview.png)
 
 ## Use ##
 
