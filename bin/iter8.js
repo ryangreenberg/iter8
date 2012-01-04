@@ -1,5 +1,8 @@
-var app = require('http').createServer(handler),
-    io = require('socket.io').listen(app),
+#!/usr/bin/env node
+;
+
+var http = require('http'),
+    socketIo = require('socket.io'),
     fs = require('fs'),
     path = require('path'),
     program = require('commander'),
@@ -13,6 +16,9 @@ program.version(version)
   .option('-p, --port <port>', 'server port [8080]', Number, 8080);
 program.parse(process.argv);
 
+// Boot
+var app = http.createServer(handler),
+    io = socketIo.listen(app);
 app.listen(program.port);
 console.log("Listening for connections on :" + program.port);
 var file = new(nodeStatic.Server)(__dirname + '/../public');
