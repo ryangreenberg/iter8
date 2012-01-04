@@ -58,6 +58,10 @@ if (pivotalCredentials) {
       iteration.currentStory = iteration.stories[iteration.currentStoryIndex];
     });
   });
+} else {
+  iteration.stories = [];
+  iteration.currentStoryIndex = 0;
+  iteration.currentStory = new models.Story();
 }
 
 io.set('log level', 1);
