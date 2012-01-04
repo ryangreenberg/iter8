@@ -1,16 +1,30 @@
-var app = require('http').createServer(handler),
-    io = require('socket.io').listen(app),
+#!/usr/bin/env node
+;
+
+var http = require('http'),
+    socketIo = require('socket.io'),
     fs = require('fs'),
     path = require('path'),
+    program = require('commander'),
     nodeStatic = require('node-static'),
-    models = require('./lib/models'),
-    pivotal = require('pivotal-tracker');
+    pivotal = require('pivotal-tracker'),
+    models = require('../lib/models');
 
-app.listen(8080);
-var file = new(nodeStatic.Server)('./public');
+// Command line args
+var version = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf-8'))["version"];
+program.version(version)
+  .option('-p, --port <port>', 'server port [8080]', Number, 8080);
+program.parse(process.argv);
+
+// Boot
+var app = http.createServer(handler),
+    io = socketIo.listen(app);
+app.listen(program.port);
+console.log("Listening for connections on :" + program.port);
+var file = new(nodeStatic.Server)(__dirname + '/../public');
 
 // Load Pivotal Tracker if credentials file exists at .pivotal_credentials.json
-var pivotalCredentialsPath = __dirname + '/.pivotal_credentials.json',
+var pivotalCredentialsPath = __dirname + '/../.pivotal_credentials.json',
   pivotalCredentials;
 if (path.existsSync(pivotalCredentialsPath)) {
   pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
@@ -44,6 +58,10 @@ if (pivotalCredentials) {
       iteration.currentStory = iteration.stories[iteration.currentStoryIndex];
     });
   });
+} else {
+  iteration.stories = [];
+  iteration.currentStoryIndex = 0;
+  iteration.currentStory = new models.Story();
 }
 
 io.set('log level', 1);
@@ -102,6 +120,5 @@ io.sockets.on('connection', function (socket) {
     iteration.startStory(iteration.stories[iteration.currentStoryIndex]);
     socket.emit("storyAdvanced", iteration.currentStory);
   });
-
 
 });
