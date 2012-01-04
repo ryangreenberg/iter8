@@ -2,12 +2,19 @@ var app = require('http').createServer(handler),
     io = require('socket.io').listen(app),
     fs = require('fs'),
     path = require('path'),
+    program = require('commander'),
     nodeStatic = require('node-static'),
     pivotal = require('pivotal-tracker'),
     models = require('../lib/models');
 
-app.listen(8080);
-console.log("Listening for connections on :8080");
+// Command line args
+var version = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf-8'))["version"];
+program.version(version)
+  .option('-p, --port <port>', 'server port [8080]', Number, 8080);
+program.parse(process.argv);
+
+app.listen(program.port);
+console.log("Listening for connections on :" + program.port);
 var file = new(nodeStatic.Server)(__dirname + '/../public');
 
 // Load Pivotal Tracker if credentials file exists at .pivotal_credentials.json
