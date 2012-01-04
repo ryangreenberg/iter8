@@ -3,14 +3,15 @@ var app = require('http').createServer(handler),
     fs = require('fs'),
     path = require('path'),
     nodeStatic = require('node-static'),
-    models = require('./lib/models'),
-    pivotal = require('pivotal-tracker');
+    pivotal = require('pivotal-tracker'),
+    models = require('../lib/models');
 
 app.listen(8080);
-var file = new(nodeStatic.Server)('./public');
+console.log("Listening for connections on :8080");
+var file = new(nodeStatic.Server)(__dirname + '/../public');
 
 // Load Pivotal Tracker if credentials file exists at .pivotal_credentials.json
-var pivotalCredentialsPath = __dirname + '/.pivotal_credentials.json',
+var pivotalCredentialsPath = __dirname + '/../.pivotal_credentials.json',
   pivotalCredentials;
 if (path.existsSync(pivotalCredentialsPath)) {
   pivotalCredentials = JSON.parse(fs.readFileSync(".pivotal_credentials.json", 'utf8'));
@@ -102,6 +103,5 @@ io.sockets.on('connection', function (socket) {
     iteration.startStory(iteration.stories[iteration.currentStoryIndex]);
     socket.emit("storyAdvanced", iteration.currentStory);
   });
-
 
 });

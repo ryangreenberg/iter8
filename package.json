@@ -18,5 +18,8 @@
     "pivotal-tracker": "0.0.x",
     "node-static": "0.5.x"
   },
+  "bin": {
+     "iter8": "./bin/iter8.js"
+   },
   "engine": "node >= 0.6.1"
 }
