@@ -12,7 +12,7 @@
        "email": "dchen@twitter.com"
      }
    ],
-  "version": "0.3.1",
+  "version": "0.3.2",
   "dependencies": {
     "commander": "0.5.x",
     "socket.io": "0.8.x",
